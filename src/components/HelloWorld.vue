@@ -16,50 +16,7 @@
       </a>
       <hr />
     </div>
-    <div v-if="accesstoken">
-      <p><strong>Patient Id:</strong> {{ patient }}</p>
-
-      <strong>Name: </strong>{{ patientdata.name[0].text }}<br />
-      <strong>Birth Date: </strong>{{ patientdata.birthDate }} <br />
-      <strong>Gender: </strong>{{ patientdata.gender }} <br />
-      <strong>Vital Status: </strong
-      >{{ patientdata.deceasedBoolean ? "Dead" : "Alive" }} <br />
-      <strong>Marital Status: </strong>{{ patientdata.maritalStatus.text }}
-      <br />
-      <strong>Telecom: </strong> <br />
-      <div v-for="telecom in patientdata.telecom" :key="telecom.value">
-        <div class="ml-2">
-          <strong>{{ telecom.system }}</strong> -
-          {{ telecom.use }}
-          {{ telecom.value }}
-        </div>
-      </div>
-
-      <strong>Address: </strong> <br />
-      <div v-for="address in patientdata.address" :key="address.use">
-        <div class="ml-2">
-          <strong>{{ address.use }} -</strong>
-          {{ address.line.toString() }}, {{ address.city }},
-          {{ address.district }}, {{ address.state }}, {{ address.postalCode }},
-          {{ address.country }}
-          <span v-if="address.period?.start"><strong>From</strong></span>
-          {{ address.period?.start }}
-        </div>
-      </div>
-
-      <strong>Language: </strong
-      >{{ patientdata.communication[0].language.coding[0].display }} <br />
-
-      <strong>General Practitioner </strong
-      >{{ patientdata.generalPractitioner[0].display }}<br />
-      <strong>Managing Organization </strong
-      >{{ patientdata.managingOrganization.display }}<br />
-      <hr />
-      <strong>Access code:</strong>
-      <p class="ml-2" style="word-break: break-all">{{ accesstoken }}</p>
-      <strong>Patient Resource:</strong>
-      <pre>{{ patientdata }}</pre>
-    </div>
+    
   </div>
 </template>
 
@@ -73,15 +30,13 @@ export default {
       accesstoken: "",
       patient: "",
       patientdata: {},
-      clientId: "42f3b173-16a8-4c50-a3ea-0269294cb869", // Replace with your client id
-      redirect: import.meta.env.PROD
-        ? "https://lucid-wozniak-940eae.netlify.app"
-        : "http://localhost:3000",
+      clientId: "", // Replace with your client id
+      redirect: "http://localhost:3000",
     };
   },
   computed: {
     authorizeLink() {
-      return `https://fhir.epic.com/interconnect-fhir-oauth/oauth2/authorize?response_type=code&redirect_uri=${this.redirect}&client_id=${this.clientId}&state=1234&scope=patient.read, patient.search`;
+      return `https://fhir.epic.com/interconnect-fhir-oauth/oauth2/authorize?response_type=code&redirect_uri=${this.redirect}&client_id=${this.clientId}&state=1234&scope=patient.read,patient.search,list.read`;
     },
   },
   async mounted() {
@@ -116,17 +71,18 @@ export default {
     }
 
     if (this.accesstoken != "") {
+      console.log("here")
       await axios
         .get(
-          `https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Patient/${this.patient}`,
+          `https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4/Patient/erXuFYUfucBZaryVksYEcMg3`,
           { headers: { Authorization: `Bearer ${this.accesstoken}` } }
         )
         .then((response) => {
           this.patientdata = response.data;
-          console.log(response);
+          console.log("allo",response);
         })
         .catch((error) => {
-          console.log(error);
+          console.log("allo",error);
         });
     }
   },
